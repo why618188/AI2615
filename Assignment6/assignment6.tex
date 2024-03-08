@@ -1,0 +1,72 @@
+%Example of use of oxmathproblems latex class for problem sheets
+\documentclass{oxmathproblems}
+
+
+%(un)comment this line to enable/disable output of any solutions in the file
+%\printanswers
+
+%define the page header/title info
+\course{Algorithm Design and Analysis (Fall 2023)}
+\sheettitle{Assignment 6\\Deadline: Jan 9, 2023} %can leave out if no title per sheet
+
+\begin{document}
+Choose \textbf{two} of the first four questions to submit.
+Question 5 is the bonus question.
+
+\begin{questions}
+
+
+\miquestion
+Prove that the following problem is NP-complete.
+Given an undirected graph $G$ and an undirected graph $H$, decide if $H$ is a subgraph of $G$.
+
+
+\begin{Solution}
+
+    First, $f\in NP$ ($f$ denotes this problem), where the certificate $y$ is a subgraph of the primal graph. If $x$ is a yes instance, there always exists $y=x$. Otherwise we can never find such $y$.
+
+    Then, I'll show \textit{CLIQUE}$\leq_k f$, which implies $f$ is NP-complete. Given a \textit{CLIQUE} instance $(G=(V, E), k)$, we can construct the instance of $f$ as $(G', H')$, where $G'=G$ and $H'$ is the complete graph with $k$ vertices. 
+    
+    $(G=(V, E), k)$ is a yes instance iff there exists the complete graph with $k$ vertices in $G$, and iff $H'$ is a subgraph of $G'$, i.e., $(G', H')$ is a yes instance. Then we finish the reduction.
+\end{Solution}
+
+\vspace{1cm}
+
+\miquestion
+Prove that the following problem is NP-complete.
+Given an undirected graph $G$ and a positive integer $k\geq 2$, decide if $G$ contains a spanning tree with maximum degree at most $k$.
+
+\begin{Solution}
+
+First, $f\in NP$ ($f$ denotes this problem), where the certificate $y$ is a spanning tree of $G$ with maximum degree at most $k$.
+
+Then, I'll show \textit{Hamiltonian Path}$\le_kf$, which implies $f$ is NP-complete. Given a \textit{Hamiltonian Path} instance $G=(V, E)$, we can construct $(G', k)$ where $G'=G$ and $k=2$.
+
+If $G=(v, E)$ is a yes instance of \textit{Hamiltonian Path}, then it is a spanning tree of $G$ since all vertices are covered, and the degree of intermediate vertex is exactly 2 and that of other two vertices is exactly 1, then $(G', 2)$ is a yes instance. On the contrary, a spanning tree with maximum degree $2$ is a Hamiltonian path, then $G=(V, E)$ is also a yes instance.
+
+\end{Solution}
+
+\miquestion
+Given an undirected graph $G=(V,E)$, prove that it is NP-complete to decide if $G$ contains an independent set with size \emph{exactly} $|V|/3$.
+
+\miquestion
+Consider the decision version of \emph{Knapsack}. Given a set of $n$ items with weights $w_1,\ldots,w_n\in\mathbb{Z}^+$ and values $v_1,\ldots,v_n\in\mathbb{Z}^+$, a capacity constraint $C\in\mathbb{Z}^+$, and a positive integer $V\in\mathbb{Z}^+$, decide if there exists a subset of items with total weight at most $C$ and total value at least $V$. Prove that this decision version of Knapsack is NP-complete.
+
+\miquestion
+(\textbf{Bonus})
+In the class, we have seen that 3SAT is NP-complete.
+In this question, we investigate the 2SAT problem and its variants.
+Similar to the 3SAT problem, in the 2SAT problem, we are given a 2-CNF Boolean formula (where each clause contains two literals) and we are to decide if this formula is satisfiable.
+\begin{parts}
+\part Prove that 2SAT is in P. (Hint: a clause $(a_i\vee a_j)$ with two literals $a_i$ and $a_j$ can be represented as two logical implications: $\neg a_i\Longrightarrow a_j$ and $\neg a_j\Longrightarrow a_i$; you may want to construct a directed graph with $2n$ vertices corresponding to $x_1,\neg x_1,x_2,\neg x_2,\ldots,x_n,\neg x_n$.)
+\part Consider this variant of the 2SAT problem: given a 2-CNF Boolean formula $\phi$ and a positive integer $k$, decide if there is a Boolean assignment to the variables such that at least $k$ clauses of $\phi$ are satisfied. Notice that 2SAT is the special case of this problem with $k$ equals to the number of the clauses. Prove that this problem is NP-complete.
+\end{parts}
+
+\miquestion
+How long does it take you to finish the assignment (including thinking and discussion)?
+Give a score (1,2,3,4,5) to the difficulty.
+Do you have any collaborators?
+Please write down their names here.
+
+\end{questions}
+\end{document}

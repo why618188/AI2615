@@ -1,0 +1,219 @@
+%Example of use of oxmathproblems latex class for problem sheets
+\documentclass{oxmathproblems}
+
+%(un)comment this line to enable/disable output of any solutions in the file
+%\printanswers
+
+%define the page header/title info
+\course{Algorithm Design and Analysis (Fall 2023)}
+\sheettitle{Assignment 4\\Deadline: Dec 26, 2023} %can leave out if no title per sheet
+
+\begin{document}
+\begin{questions}
+
+\miquestion [30]
+Consider that you are in a stock market and you would like to maximize your profit. Suppose the prices of the stock for the $n$ days, $p_1,p_2,\ldots,p_n$, are given to you. On the $i$-th day, you are allowed to do exactly one of the following operations:
+     \begin{itemize}
+         \item Buy one unit of the stock and pay the price $p_i$. Your stock will increase by $1$.
+         \item Sell one unit of stock and get the reward $p_i$ if your stock is at least $1$. Your stock will decrease by one.
+         \item Do nothing.
+     \end{itemize}
+    Design an $O(n^2)$ time dynamic programming algorithm.
+
+    \textbf{Remark:} [Not for credits] There exits a clever greedy algorithm that runs in $O(n\log n)$ time. Can you figure it out? 
+
+\begin{Solution}
+
+Define the sub-problem $f(i, j)$ being the maximum of the profit we have earned after $i$ days with $j$ stocks left. For the first operation, $f(i, j)=f(i-1, j-1)-p_i$ when $j>0$. For the second operation, $f(i, j)=f(i-1, j+1)+p_i$. For the third operation, $f(i, j)=f(i-1, j)$. Therefore, we have the following recurrence relation:
+$$
+    f(i, j)=\left\{
+                \begin{array}{ll}
+                  \text{max}\{f(i-1, j-1)-p_i,\ f(i-1,j+1)+p_i,\ f(i-1,j)\},\ \ j>0,\\
+                  \text{max}\{f(i-1,j+1)+p_i,\ f(i-1,j)\},\ \ \text{otherwise.}
+                \end{array}
+              \right.
+$$
+
+However, $f(i, j)$ is invalid when $j>i$ since we cannot have more than $i$ stocks after $i$ days even if we buy one unit of the stock every day. For initialization, we can set $f(0,0)=0$ and $f(i,j)=-\infty$ where $j>i$.
+
+The algorithm is below.
+
+\begin{algorithm}[H]
+    \caption{Maximize the Profit}
+    \label{}
+    \renewcommand{\algorithmicrequire}{\textbf{Input:}}
+    \begin{algorithmic}[1]
+        \Require the prices of the stock for $n$ days, $p_1,p_2,...,p_n$
+        \State Initialize $f[0][0]=0$ and $f[i][j]=-\infty$ for $i<j$
+        \For{$i=1,...,n$}
+        \State $f[i][0]=\text{max}\{f[i-1][1]+p_i,\ f[i-1][0]\}$
+        \For{$j=1,...,i$}
+        \State $\ f[i][j]=\text{max}\{f[i-1][j-1]-p_i,\ f[i-1][j+1]+p_i,\ f[i-1][j]\}$
+        \EndFor
+        \EndFor
+        \State \textbf{return} $\text{max}_{j=0,...n}f[n][j]$
+    \end{algorithmic}
+\end{algorithm}
+
+The correctness of the algorithm is trivial by induction. For the base step, we do nothing before the first day, so $f(0,0)$ is $0$. For the inductive step, suppose $f(i-1, j-1)$, $f(i-1,j)$, $f(i-1,j+1)$ are correct. We can only do three types of operations on $i$-th day, so the maximum profit we can earn after $i$ days with $j$ stocks left is the maximum of three operations. In the expressions of three operations, only $f(i-1, j-1)$, $f(i-1,j)$, $f(i-1,j+1)$ are involved and they are correct, so $f(i,j)$ is correct.
+
+The initialization is $O(n^2)$ since it traverses half of the state space $O(n^2)$. The main part is $O(n^2)$ since it traverses another half. So the overall time complexity is $O(n^2)$.
+\end{Solution}
+
+\miquestion[30]
+Given two strings $x=x_1x_2\cdots x_n$ and $y=y_1y_2\cdots y_n$, we wish to find the length of their \emph{longest common subsequence}, that is, the largest $k$ for which there are indices $i_1<i_2<\cdots <i_k$ and $j_1<j_2<\cdots<j_k$ with $x_{i_1}x_{i_2}\cdots x_{i_k}=y_{j_1}y_{j_2}\cdots y_{j_k}$. Design an $O(n^2)$ dynamic programming algorithm for this problem.
+
+\begin{Solution}
+
+This problem is similar to \textit{longest palindrome sub-sequence} problem introduced in the lecture. Let $S[i]$ denotes the prefix $s_1s_2...s_i$. Define the sub-problem $f(i, j)$ being the length of the longest common sub-sequence (abbreviated as LCS) of $X[i]$ and $Y[j]$. We have the following recurrence relation:$$
+    f(i, j)=\left\{
+                \begin{array}{ll}
+                  f(i-1, j-1)+1,\ \ x_i=y_j,\\
+                  \text{max}\{f(i, j-1),\ f(i-1, j)\},\ \ \text{otherwise.}
+                \end{array}
+              \right.
+$$
+
+The algorithm is below.
+
+\begin{algorithm}[H]
+    \caption{Find the Length of LCS of Two Strings}
+    \label{}
+    \renewcommand{\algorithmicrequire}{\textbf{Input:}}
+    \begin{algorithmic}[1]
+        \Require two strings $x=x_1x_2...x_n$ and $y=y_1y_2...y_n$
+        \State Initialize $f[i][0]=0$ and $f[0][j]=0$ for each $i\in[0,\ n]$ and $j\in[0,\ n]$.
+        \For{$i=1,...,n$}
+        \For{$j=1,...,n$}
+        \If{$x[i]=y[j]$}
+            $\ \ f[i][j]=f[i-1][j-1]+1$
+        \Else
+             $\ \ \ f[i][j]=\text{max}\{f[i-1][j],\ f[i][j-1]\}$
+        \EndIf
+        \EndFor
+        \EndFor
+        \State \textbf{return} $f[n][n]$
+    \end{algorithmic}
+\end{algorithm}
+
+I'll show the correctness of the algorithm by induction. Claim that $f(i,j)$ gives the correct the length of LCS of $X[i]$ and $Y[j]$.
+
+\textbf{\textit{Base step:}}
+
+If $i=0$ or $j=0$, at least one string is empty, which implies the length of LCS is 0. Therefore, $f(i,0)=f(0,j)=0$ for any $i\in[1,n]$ and $j\in[1,n]$.
+
+\textbf{\textit{Inductive step:}}
+
+Suppose that $f(m,n)$ is correct where $m\in[0,i]$, $n\in[0,j]$ except $m=i$, $n=j$. We need to show $f(i,j)$ is also correct. There are two scenarios when proceeding with $f(i,j)$:
+
+\begin{itemize}
+    \item $x_i=y_j$: 
+    
+    Suppose $a_1a_2...a_m$ (with length $m$) is the LCS of $X[i-1]$ and $Y[j-1]$, then $a_1a_2...a_mx_i$ (with length $m+1$) is the LCS of $X[i]$ and $Y[j]$. Otherwise, let $OPT$ (with length $\ge m+1$) denotes the LCS of $X[i]$ and $Y[j]$. 
+    
+    If $x_i\notin OPT$, then $OPT$ is a common sub-sequence of $X[i-1]$ and $Y[j-1]$. We can append $x_i$ to $OPT$ to get a better solution, which leads to contradiction. 
+    
+    If $x_i\in OPT$, then $OPT'=OPT\setminus\{x_i\}$ (with length $\ge m$) is a common sub-sequence of $X[i-1]$ and $Y[j-1]$. If $|OPT'|>m$, this contradicts to the assumption that $f(i-1, j-1)$ is correct. If $|OPT'|=m$, we can alternately choose $OPT$ to be the LCS of $X[i]$ and $Y[j]$ whose length is also $m+1$.
+
+    Therefore, $f(i, j)=f(i-1,j-1)+1$ holds for this scenario. 
+
+    \item $x_i\neq y_j$: 
+    
+    Suppose $f(i-1, j)\ge f(i, j-1)$ w.l.o.g., and $a_1a_2...a_m$ (with length $m$) is the LCS of $X[i-1]$ and $Y[j]$. Then $a_1a_2...a_m$ is the LCS of $X[i]$ and $Y[j]$. Otherwise, let $OPT$ (with length $\ge m$) denotes the LCS of $X[i]$ and $Y[j]$.
+
+    If $x_i\notin OPT$, then $OPT$ is a common sub-sequence of $X[i-1]$ and $Y[j]$. If $|OPT|>m$, this contradicts to the assumption that $f(i-1,j)$ is correct; if $|OPT|=m$, we can alternately choose $OPT$ to be the LCS of $X[i]$ and $Y[j]$ whose length is also $m$.
+
+    If $x_i\in OPT$, then $y_j\notin OPT$ since $x_i\neq y_j$, which implies that $OPT$ is a common sub-sequence of $X[i]$ and $Y[j-1]$. If $|OPT|>m$, this contradicts to the assumption that $f(i-1, j)=m\ge f(i, j-1)$. If $|OPT|=m$, we can also choose $|OPT|$.
+
+    Therefore, $f(i, j)=\text{max}\{f(i, j-1),\ f(i-1, j)\}$ holds for this scenario.
+\end{itemize}
+
+Therefore, $f(i, j)$ is correct, and the inductive step is completed. The correctness of the algorithm is also proven.
+
+The initialization is $O(n)$. In the main part, the algorithm traverse each $i\in[1,n]$ and $j\in[1,n]$ to compute $f[i][j]$ which is $O(1)$, so this part is $O(n^2)$. The overall time complexity is $O(n^2)$.
+
+
+
+\end{Solution}
+
+\miquestion[40]
+In the \emph{Traveling Salesman Problem} (TSP), we are given an undirected weighted complete graph $G=(V,E,w)$ (where $(i,j)\in E$ for any $i\neq j\in V$). The objective is to find a tour that visit each vertex exactly once such that the total distance traveled in the tour is minimized.
+Obviously, the na\"ive exhaustive search algorithm requires $O((n-1)!)$ time.
+In this question, you are to design a dynamic programming algorithm for the TSP problem with time complexity $O(n^2\cdot 2^n)$.
+\begin{parts}
+\part[10] Show that $n^2\cdot 2^n=o((n-1)!)$, so that the above-mentioned algorithm is indeed faster than the na\"ive exhaustive search algorithm.
+\part[30] Design this algorithm. Hint: label all vertices as $1,2,\ldots,n$; given $i\in V$ and $S\subseteq V\setminus\{1,i\}$, let $d(S,i)$ be the length of the shortest path from $1$ to $i$ where the intermediate vertices are \emph{exactly} those in $S$; show that the minimum weight cycle/tour is $\min_{i=2,3,\ldots,n}\{d(V\setminus\{1,i\},i)+w(i,1)\}$.
+\end{parts}
+
+\begin{Solution}
+\begin{parts}
+\part According to Stirling's approximation, we have that $$(n-1)!=\sqrt{2\pi (n-1)}\left(\frac{n-1}{e}\right)^{n-1}.$$Take the logarithm of the values, we have
+\begin{gather*}
+     \log(n^2\cdot2^n)=2\log n+n\log 2=O(n),\\
+     \log((n-1)!)=\frac{1}{2}\log 2\pi(n-1) + (n-1)\log (n-1) - (n-1) \log e=O(n\log n).
+\end{gather*}
+
+These two equations imply $n^2\cdot 2^n =o((n-1)!)$.
+
+\part Following the hint, define the sub-problem $d(S,i)$ be the length of the shortest path from $1$ to $i$ where the intermediate vertices are \emph{exactly} those in $S$. Then we have the following recurrence relation: $$d(S,i)=\text{min}_{j\in S}\left\{d(S\setminus \{j\},j) + w(j, i)\right\}.$$
+For initialization, we can set $d(\emptyset, i)=w(1,i)$. The complete algorithm is below.
+
+\begin{algorithm}[H]
+    \caption{Solve TSP with Dynamic Programming}
+    \label{}
+    \renewcommand{\algorithmicrequire}{\textbf{Input:}}
+    \begin{algorithmic}[1]
+        \Require an undirected weighted complete graph $G=(V, E, w)$
+        \State Initialize $d(\emptyset, i)=w(1,i)$.
+        \For{$m=1,2,...,n-2$}
+            \For{$S\subseteq V\setminus\{1\}$ with size $|S|=m$}
+                \For{$i\in V \setminus (S\cup \{1\})$}
+                    \State $d(S,i)=\text{min}_{j\in S}\left\{d(S\setminus \{j\},j) + w(j, i)\right\}$
+                \EndFor
+            \EndFor
+        \EndFor
+        \State \textbf{return} $\min_{i=2,3,\ldots,n}\{d(V\setminus\{1,i\},i)+w(i,1)\}$
+    \end{algorithmic}
+\end{algorithm}
+
+The correctness of the algorithm is below. 
+
+First, claim that $d(S, i)$ produced by the algorithm is correct, i.e., $d(S, i)$ is the length of the shortest path from $1$ to $i$ where the intermediate vertices are exactly those in $S$. I'll prove this by induction.
+
+\textbf{\textit{Base step:}}
+
+$d(\emptyset, i)=w(1, i)$ holds trivial since the path from $1$ to $i$ without intermediate vertices is exactly the edge whose endpoints are $1$ and $i$. 
+
+\textit{\textbf{Inductive step:}}
+
+For $d(S,i)$, suppose $d(S\setminus\{j\},j)$ is correct for any $j\in S$. Suppose the \textbf{optimal} path from $1$ to $i$ with intermediate vertices formed by $S$ is $1s_1s_2...s_{|S|}i$, whose length is $d(S,i)=d(S\setminus\{s_k\},s_k)+w(s_k, i)$. This is one of the terms in $\left\{d(S\setminus \{j\},j) + w(j, i),\ j\in S\right\}$. Since $d(S\setminus \{j\},j)$ is correct, which implies all these terms are true distance of paths, therefore $d(S,s_k)+w(s_k, i)\le d(S\setminus \{j\},j)+w(j,i), j\in S$ according our assumption. Therefore $d(S, i)$ is correct and furthermore the claim is also correct.
+
+The left we have to do is to show that the minimum weight cycle is $\min_{i=2,3,\ldots,n}\{d(V\setminus\{1,i\},i)+w(i,1)\}$. This is similar to the inductive step. The minimum weight cycle must be one of the terms in $d(V\setminus\{1,i\},i)+w(i,1)$, take the minimum for this will gives the correct answer.
+
+\vspace{0.5cm}
+
+The first loop traverses with size of $O(n)$, the second and third loop traverses all subset of $V$ with size of $O(2^n)$, and computing the minimum from $j\in S$ requires $O(n)$ time. So the overall time complexity is $O(n^2\cdot2^n)$.
+
+\end{parts}
+
+\end{Solution}
+
+\vspace{1.5cm}
+
+\miquestion
+How long does it take you to finish the assignment (including thinking and discussion)?
+Give a score (1,2,3,4,5) to the difficulty.
+Do you have any collaborators?
+Please write down their names here.
+
+\begin{Solution}
+
+These three questions cost 1.5h, 2.5h, 3h respectively (typing also included).
+
+The difficulty scores are 2, 3, 3 respectively.
+
+I complete this assignment independently.
+\end{Solution}
+
+\end{questions}
+\end{document}
